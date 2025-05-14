@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R7種子島拠点　農薬・水量計算アプリ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #e6f4e6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    select, button {
+      margin-top: 5px;
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+    }
+    .result {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+    .calculate-button {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 10px 20px;
+    }
+    .calculate-button:hover {
+      background-color: #27682a;
+    }
+  </style>
+</head>
+<body>
+  <h1>R7種子島拠点　農薬・水量計算アプリ</h1>
+
+  <label for="fields">畑を選択（複数可）:</label>
+  <select id="fields" size="15" multiple>
+    <!-- 省略：畑の選択肢は元のまま -->
+    <option value="ガラス室(1)(４次増殖)" data-area="1.3">ガラス室(1)(４次増殖)（1.3a）</option>
+    <option value="ガラス室(2)(４次増殖)" data-area="1.3">ガラス室(2)(４次増殖)（1.3a）</option>
+    <option value="2(生検2株)" data-area="17.4">2(生検2株)（17.4a）</option>
+    <option value="3(生検4次春)" data-area="17.6">3(生検4次春)（17.6a）</option>
+    <option value="3(生検4次増殖)" data-area="10.9">3(生検4次増殖)（10.9a）</option>
+    <option value="5(生検4次株)" data-area="15.1">5(生検4次株)（15.1a）</option>
+    <option value="6-1(実生)" data-area="11.4">6-1(実生)（11.4a）</option>
+    <option value="6-2(沖縄一括春)" data-area="9.2">6-2(沖縄一括春)（9.2a）</option>
+    <option value="7-1(夏植え新)" data-area="0">7-1(夏植え新)（0a）</option>
+    <option value="7-1(さび病薬剤)" data-area="3.8">7-1(さび病薬剤)（3.8a）</option>
+    <option value="7-2(3次株)" data-area="5.5">7-2(3次株)（5.5a）</option>
+    <option value="7-2(3次春)" data-area="5.5">7-2(3次春)（5.5a）</option>
+    <option value="7-3(種苗審査株)" data-area="5.9">7-3(種苗審査株)（5.9a）</option>
+    <option value="8-1(沖縄一括株)" data-area="10.4">8-1(沖縄一括株)（10.4a）</option>
+    <option value="9-1(増殖)" data-area="6.0">9-1(増殖)（6.0a）</option>
+    <option value="10-1(3次春)" data-area="5.9">10-1(3次春)（5.9a）</option>
+    <option value="10-1(3次株)" data-area="5.9">10-1(3次株)（5.9a）</option>
+    <option value="10-2(ジーンバンク旧)" data-area="18.2">10-2(ジーンバンク旧)（18.2a）</option>
+    <option value="11-1(実生)" data-area="17.5">11-1(実生)（17.5a）</option>
+    <option value="11-2(ジーンバンク新)" data-area="18.2">11-2(ジーンバンク新)（18.2a）</option>
+    <option value="12(実生)" data-area="16.8">12(実生)（16.8a）</option>
+    <option value="14-2(Bru1検証)" data-area="4.4">14-2(Bru1検証)（4.4a）</option>
+    <option value="15-1(実生)" data-area="0">15-1(実生)（0a）</option>
+    <option value="15-2(多回株)" data-area="6.2">15-2(多回株)（6.2a）</option>
+    <option value="17(2次春)" data-area="25.2">17(2次春)（25.2a）</option>
+    <option value="18(2次株)" data-area="33.5">18(2次株)（33.5a）</option>
+  </select>
+
+  <br>※Ctrlキー＋クリックで複数の圃場を追加できます。
+　<br>圃場面積は耕作面積*1.2です。
+  <br>アージランは混ぜて使う場合は「混用」。
+  <br>アージラン単品で使う時は「単剤」を選択してください。
+  <br>殺虫剤はドローンで散布する場合の値です。
+
+  <label>農薬を選択1:</label>
+  <select id="chemical1">
+    <option value="選択なし">選択なし</option>
+    <option value="センコル（土壌処理）">センコル（土壌処理）</option>
+    <option value="センコル（茎葉処理）">センコル（茎葉処理）</option>
+    <option value="アージラン単剤">アージラン単剤</option>
+    <option value="アージラン混用">アージラン混用</option>
+    <option value="シャドー">シャドー</option>
+    <option value="カーメックス">カーメックス</option>
+    <option value="24-D">24-D</option>
+    <option value="ダントツ">ダントツ</option>
+    <option value="サムコル">サムコル</option>
+  </select>
+
+  <label>農薬を選択2:</label>
+  <select id="chemical2">
+    <option value="選択なし">選択なし</option>
+    <option value="センコル(土壌処理)">センコル(土壌処理)</option>
+    <option value="センコル（茎葉処理）">センコル（茎葉処理）</option>
+    <option value="アージラン単剤">アージラン単剤</option>
+    <option value="アージラン混用">アージラン混用</option>
+    <option value="シャドー">シャドー</option>
+    <option value="カーメックス">カーメックス</option>
+    <option value="24-D">24-D</option>
+    <option value="ダントツ">ダントツ</option>
+    <option value="サムコル">サムコル</option>
+  </select>
+
+  <button class="calculate-button" onclick="calculate()">計算する</button>
+
+  <div class="result" id="result"></div>
+  <button onclick="copyResult()">結果をコピー</button>
+
+  <script>
+    const fieldAreas = {
+      "ガラス室(1)(４次増殖)": 1.3, "ガラス室(2)(４次増殖)": 1.3, "2(生検2株)": 17.4, "3(生検4次春)": 17.6,
+      "3(生検4次増殖)": 10.9, "5(生検4次株)": 15.1, "6-1(実生)": 11.4, "6-2(沖縄一括春)": 9.2,
+      "7-1(夏植え新)": 0, "7-1(さび病薬剤)": 3.8, "7-2(3次株)": 5.5, "7-2(3次春)": 5.5,
+      "7-3(種苗審査株)": 5.9, "8-1(沖縄一括株)": 10.4, "9-1(増殖)": 6.0, "10-1(3次春)": 5.9,
+      "10-1(3次株)": 5.9, "10-2(ジーンバンク旧)": 18.2, "11-1(実生)": 17.5, "11-2(ジーンバンク新)": 18.2,
+      "12(実生)": 16.8, "14-2(Bru1検証)": 4.4, "15-1(実生)": 0, "15-2(多回株)": 6.2,
+      "17(2次春)": 25.2, "18(2次株)": 33.5
+    };
+
+    const chemicalData = {
+      "センコル（土壌処理）": { waterPerA: 10, chemPerA: 30 },
+　　　 "センコル（茎葉処理）": { waterPerA: 10, chemPerA: 20 },
+      "アージラン単剤": { waterPerA: 10, chemPerA: 100 },
+      "アージラン混用": { waterPerA: 10, chemPerA: 50 },
+      "シャドー": { waterPerA: 10, chemPerA: 20 },
+      "カーメックス": { waterPerA: 10, chemPerA: 15 },
+      "24-D": { waterPerA: 10, chemPerA: 50 },
+      "ダントツ": { waterPerA: 0.24, chemPerA: 10 },
+      "サムコル": { waterPerA: 0.24, chemPerA: 4.8 }
+    };
+
+    function calculate() {
+      const selectedFields = Array.from(document.getElementById("fields").selectedOptions).map(o => o.value);
+      const chem1 = document.getElementById("chemical1").value;
+      const chem2 = document.getElementById("chemical2").value;
+
+      if (selectedFields.length === 0) {
+        document.getElementById("result").innerHTML = "<p style='color:red;'>畑を1つ以上選択してください。</p>";
+        return;
+      }
+
+      let totalArea = 0;
+      selectedFields.forEach(f => {
+        const area = fieldAreas[f];
+        if (typeof area === 'number') totalArea += area;
+      });
+
+      let maxWaterPerA = 0;
+      let chemAmount1 = 0;
+      let chemAmount2 = 0;
+
+      if (chem1 !== "選択なし") {
+        const data1 = chemicalData[chem1];
+        maxWaterPerA = Math.max(maxWaterPerA, data1.waterPerA);
+        chemAmount1 = totalArea * data1.chemPerA;
+      }
+
+      if (chem2 !== "選択なし") {
+        const data2 = chemicalData[chem2];
+        maxWaterPerA = Math.max(maxWaterPerA, data2.waterPerA);
+        chemAmount2 = totalArea * data2.chemPerA;
+      }
+
+      let totalWater = totalArea * maxWaterPerA;
+
+      let resultHTML = `<h3>計算結果</h3>`;
+      let fieldDetails = selectedFields.map(f => `${f}：${fieldAreas[f]}a`).join("<br>");
+      resultHTML += `<strong>選択された畑の内訳：</strong><br>${fieldDetails}<br><br>`;
+      resultHTML += `<strong>合計面積：</strong><br>${totalArea.toFixed(1)}a<br><br>`;
+      resultHTML += `<strong>必要な水の量（合計）：</strong><br>${totalWater.toFixed(1)}L<br><br>`;
+      resultHTML += `<strong>必要な農薬の量（合計）：</strong><br>`;
+      if (chem1 !== "選択なし") resultHTML += `${chem1}：${chemAmount1.toFixed(1)}g<br>`;
+      if (chem2 !== "選択なし") resultHTML += `${chem2}：${chemAmount2.toFixed(1)}g`;
+
+      document.getElementById("result").innerHTML = resultHTML;
+    }
+
+    function copyResult() {
+      const resultElement = document.getElementById("result");
+      const tempElement = document.createElement("textarea");
+      tempElement.value = resultElement.innerText;
+      document.body.appendChild(tempElement);
+      tempElement.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempElement);
+      alert("計算結果をコピーしました。");
+    }
+  </script>
+
+  <br>※混合する順番は、液剤→展着剤→水溶剤→乳剤→フロアブル→水和剤。
+  <br>センコル＆アージランの場合はアージランをタンクに入れてからセンコルを入れる。
+  <br>面積の10倍がその圃場に撒くべき水量です。
+  <br>散布実施者はスプレイヤーのパネルで実際の散布量を確認し、アグリノートに記入しましょう。
+  <br>実際に薬品を調合する場合は100L刻みでタンクに水を入れたほうが薬が余らなくて済みます。
+  <br>余った薬は枕に撒いたり休耕圃場に撒いたりして処理します。
+  <br>以下計算式に入っている1aあたりの薬品量
+  <br> センコル（土壌処理）:30
+　<br>センコル（茎葉処理） :20
+　<br>アージラン単剤      :100
+　<br>アージラン混用      :50
+　<br>シャドー           :20
+　<br>カーメックス        :15
+　<br>24-D              :50
+　<br>ダントツ           :10
+　<br>サムコル           :4.8
+</body>
+</html>
+
+cd パス/to/desktop/nouyaku-calc-app
+git init
+git add .
+git commit -m "初回コミット"
+
+cd ~/Desktop/nouyaku-calc-app
+git init
+git add index.html
+git commit -m "初回コミット"
